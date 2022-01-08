@@ -81,7 +81,7 @@ menu_main()
     selection=""
     while [[ $selection != Print ]]; do
         selection=$(zenity --list $z_looks --text "$(menu_main_text_build)" --column="Menu" \
-                           Print Copies Pages Presets Other )
+                           Print Copies Pages Presets Other Utilities )
         [[ $selection ]] || exit 0
         log_it "DEBUG $selection"
 		case "$selection" in
@@ -89,6 +89,7 @@ menu_main()
             Pages)   menu_pages;;
             Presets) menu_presets;;
             Other)   menu_other;;
+			Utilities) menu_utilities;;
         esac
     done
 }
@@ -109,7 +110,7 @@ menu_other()
 {
     # TODO: come back to this menu when selection is made
     selection=$(zenity --list $z_looks --text "$(menu_main_text_build)\nOther Settings:" --column="Settings" \
-                       Layout Duplex Folding Booklet Color PaperTray Manual)
+                       Layout Duplex Folding Booklet Color PaperTray Manual Back )
     [[ $selection ]] || return
     log_it "DEBUG menu_other -> $selection"
     case "$selection" in
@@ -122,7 +123,19 @@ menu_other()
 		Manual) p_manual=$(zenity --entry $z_looks \
 								   --text="Manual entry of parameters:" \
 								   --entry-text="$p_manual");;
-        ,*) return;;
+        *) return;;
+    esac
+}
+
+menu_utilities()
+{
+    selection=$(zenity --list $z_looks --text "$(menu_main_text_build)\n Utilities:" --column="Select:" \
+                       "Print Mailing" Back )
+    [[ $selection ]] || return
+    log_it "DEBUG menu_utilities -> $selection"
+    case "$selection" in
+        "Print Mailing") menu_wip;;
+        *) return;;
     esac
 }
 
@@ -136,7 +149,7 @@ menu_presets()
         Bulletins) menu_wip;;
         "Scaled Bulletins") menu_wip;;
         "Large Bulletins") menu_wip;;
-        ,*) return;;
+        *) return;;
     esac
 }
 
