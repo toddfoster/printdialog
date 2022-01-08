@@ -49,6 +49,7 @@ p_folding=""
 p_booklet=""
 p_papertray=""
 p_presets=""
+p_manual=""
 
 menu_wip()
 {
@@ -61,6 +62,7 @@ menu_main_text_build()
     result="$result Dest: $p_printer\n"
     [[ $p_copies ]] && result="$result Copies: $p_copies\n"
     [[ $p_pages  ]] && result="$result Pages: $p_pages\n"
+	[[ $p_manual ]] && result="$result Manual: $p_manual\n"
     echo $result
 }
 
@@ -71,7 +73,7 @@ cmd_build()
     cmd_pages=""
     [[ $p_copies ]] && cmd_copies="-n $p_copies"
     [[ $p_pages  ]] &&  cmd_pages="-P $p_pages"
-    echo "lp $cmd_printer $cmd_pages $cmd_copies $p_file"
+    echo "lp $cmd_printer $cmd_pages $cmd_copies $p_manual $p_file"
 }
 
 menu_main()
@@ -107,7 +109,7 @@ menu_other()
 {
     # TODO: come back to this menu when selection is made
     selection=$(zenity --list $z_looks --text "$(menu_main_text_build)\nOther Settings:" --column="Settings" \
-                       Layout Duplex Folding Booklet Color PaperTray)
+                       Layout Duplex Folding Booklet Color PaperTray Manual)
     [[ $selection ]] || return
     log_it "DEBUG menu_other -> $selection"
     case "$selection" in
@@ -117,6 +119,9 @@ menu_other()
         Booklet) menu_wip;;
         Color) menu_wip;;
         PaperTray) menu_wip;;
+		Manual) p_manual=$(zenity --entry $z_looks \
+								   --text="Manual entry of parameters:" \
+								   --entry-text="$p_manual");;
         ,*) return;;
     esac
 }
