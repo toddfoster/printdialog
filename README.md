@@ -9,10 +9,10 @@ Zenity is kind of fun: easy, quick results.
 ## Good Intentions (and perhaps some ill-advised ones as well!)
 - TODO: won't print multiple copies (to my Brother printer)
 - TODO: check return codes from dialogs and leave values unchanged when "cancel"
+- TODO: fill out wip features
 - DONE: optionally accept filename(s) as arguments to script
 - DONE: optionally accept printer name as argument to script
 - DONE: skip initial prompts for arguments provided
-- TODO: fill out wip features
 - DONE: Utilities: e.g., round out a pdf to have a number of pages divisible by 4 (matching page size)
 - ABANDON: Presets / Utilities / Other offer numerals in first column for easy keyboard access? No: Auto filter by alpha is more intuitive.
 
