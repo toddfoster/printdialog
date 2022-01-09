@@ -13,7 +13,7 @@ Zenity is kind of fun: easy, quick results.
 - DONE: optionally accept printer name as argument to script
 - DONE: skip initial prompts for arguments provided
 - TODO: fill out wip features
-- TODO: Utilities: e.g., round out a pdf to have a number of pages divisible by 4 (matching page size)
+- DONE: Utilities: e.g., round out a pdf to have a number of pages divisible by 4 (matching page size)
 - ABANDON: Presets / Utilities / Other offer numerals in first column for easy keyboard access? No: Auto filter by alpha is more intuitive.
 
 ## Notes
