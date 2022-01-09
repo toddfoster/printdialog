@@ -24,16 +24,16 @@ log_it()
     verbose_info=5
     verbose_status=1
     level=11
-    if [[ $* == DEBUG* ]]; then
-        level=$verbose_debug
-    elif [[ $* == INFO* ]]; then
-        level=$verbose_info
-	elif [[ $* == STATUS* ]]; then
-        level=$verbose_status
-    fi
+	case "$*" in
+		DEB) level=$verbose_debug  ;;
+		INF) level=$verbose_info   ;;
+		STA) level=$verbose_status ;;
+		FIN) level=$verbose_status ;;
+		*)   level=$verbose_debug  ;;
+	esac
 
     if (( level <= verbose )); then
-        printf "LOG $(date --iso-8601=seconds) | $_self | $*\n";
+        printf "LOG %s | %s | %s\n" "$(date --iso-8601=seconds)" "$_self" "$*" ;
     fi
 }
 
@@ -50,6 +50,31 @@ p_booklet=""
 p_papertray=""
 p_presets=""
 p_manual=""
+cmd=""
+
+help=""
+
+while getopts "d:n:P:hv" opt
+do
+    case $opt in
+	v) verbose=100 ;;
+	d) p_printer=$OPTARG ;;
+	n) p_copies=$OPTARG ;;
+	P) p_pages=$OPTARG ;;
+	*) help=true ;;
+    esac
+done
+
+if [ $help ]; then
+    usage
+    exit 0
+fi
+
+log_it "START $*"
+
+shift $((OPTIND-1)) # leave filenames in $@
+                    # after extracting options
+p_file="$*"
 
 menu_wip()
 {
@@ -68,12 +93,13 @@ menu_main_text_build()
 
 cmd_build()
 {
-    cmd_printer="-d $p_printer"
-    cmd_copies=""
-    cmd_pages=""
-    [[ $p_copies ]] && cmd_copies="-n $p_copies"
-    [[ $p_pages  ]] &&  cmd_pages="-P $p_pages"
-    echo "lp $cmd_printer $cmd_pages $cmd_copies $p_manual $p_file"
+	unset cmd
+	cmd=( "lp")
+	cmd+=( "-d $p_printer" )
+    [[ $p_copies ]] && cmd+=( "-n $p_copies" )
+    [[ $p_pages  ]] && cmd+=( "-P $p_pages"  )
+	echo "${cmd[*]}"
+
 }
 
 menu_main()
@@ -167,13 +193,23 @@ log_it "DEBUG File selected: $p_file"
 
 # Get Printer
 printers=$(lpstat -a | awk '{print $1}')
-p_printer=$(echo "$printers" | zenity --list $z_looks --column="Printer" \
+[[ ! $p_printer ]] && p_printer=$(echo "$printers" | zenity --list $z_looks --column="Printer" \
                                       --text " File: $p_file\n\nSelect a printer")
 [[ $p_printer ]] || exit 0
 log_it "DEBUG Selected $p_printer"
 
 menu_main
 
-cmd=$(cmd_build)
-log_it "DEBUG Command = $cmd"
-zenity --info $z_looks --text="Printing:\n\n$cmd"
+lp_cmd="$(cmd_build)"
+zenity --question $z_looks --text="Printing:\n\n$lp_cmd $p_file\n\nCorrect?"
+case $? in
+	0)
+		log_it "INFO $lp_cmd $p_file"
+	    result=$($lp_cmd "$p_file")
+		log_it "INFO $result"
+		;;
+	*)
+		log_it "INFO Aborted print"
+
+esac
+log_it "FINISHED $result"
