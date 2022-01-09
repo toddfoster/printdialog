@@ -1,5 +1,5 @@
 #!/bin/bash
-#  Time-stamp: <2022-01-09 07:47:35 todd>
+#  Time-stamp: <2022-01-09 07:49:49 todd>
 _self="${0##*/}"
 
 usage()
@@ -92,24 +92,6 @@ menu_main_text_build()
     echo $result
 }
 
-menu_main()
-{
-    selection=""
-    while [[ $selection != Print ]]; do
-        selection=$(zenity --list $z_looks --text "$(menu_main_text_build)" --column="Menu" \
-                           Print Copies Pages Presets Other Utilities )
-        [[ $selection ]] || exit 0
-        log_it "DEBUG $selection"
-		case "$selection" in
-            Copies)  menu_copies;;
-            Pages)   menu_pages;;
-            Presets) menu_presets;;
-            Other)   menu_other;;
-			Utilities) menu_utilities;;
-        esac
-    done
-}
-
 menu_copies()
 {
     [[ $p_copies ]] || p_copies=1
@@ -188,7 +170,21 @@ printers=$(lpstat -a | awk '{print $1}')
 [[ $p_printer ]] || exit 0
 log_it "DEBUG Selected $p_printer"
 
-menu_main
+# Present main menu
+selection=""
+while [[ $selection != Print ]]; do
+    selection=$(zenity --list $z_looks --text "$(menu_main_text_build)" --column="Menu" \
+                       Print Copies Pages Presets Other Utilities )
+    [[ $selection ]] || exit 0
+    log_it "DEBUG $selection"
+	case "$selection" in
+        Copies)  menu_copies;;
+        Pages)   menu_pages;;
+        Presets) menu_presets;;
+        Other)   menu_other;;
+		Utilities) menu_utilities;;
+    esac
+done
 
 # Build command
 cmd=( "lp")
