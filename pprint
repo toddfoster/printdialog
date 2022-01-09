@@ -1,4 +1,5 @@
 #!/bin/bash
+#  Time-stamp: <2022-01-09 07:47:35 todd>
 _self="${0##*/}"
 
 usage()
@@ -89,17 +90,6 @@ menu_main_text_build()
     [[ $p_pages  ]] && result="$result Pages: $p_pages\n"
 	[[ $p_manual ]] && result="$result Manual: $p_manual\n"
     echo $result
-}
-
-cmd_build()
-{
-	unset cmd
-	cmd=( "lp")
-	cmd+=( "-d $p_printer" )
-    [[ $p_copies ]] && cmd+=( "-n $p_copies" )
-    [[ $p_pages  ]] && cmd+=( "-P $p_pages"  )
-	echo "${cmd[*]}"
-
 }
 
 menu_main()
@@ -200,12 +190,18 @@ log_it "DEBUG Selected $p_printer"
 
 menu_main
 
-lp_cmd="$(cmd_build)"
-zenity --question $z_looks --text="Printing:\n\n$lp_cmd $p_file\n\nCorrect?"
+# Build command
+cmd=( "lp")
+cmd+=( "-d $p_printer" )
+[[ $p_copies ]] && cmd+=( "-n $p_copies" )
+[[ $p_pages  ]] && cmd+=( "-P $p_pages"  )
+echo "${cmd[*]}"
+
+zenity --question $z_looks --text="Printing:\n\n${cmd[*]} $p_file\n\nCorrect?"
 case $? in
 	0)
-		log_it "INFO $lp_cmd $p_file"
-	    result=$($lp_cmd "$p_file")
+		log_it "INFO ${cmd[*]} $p_file"
+	    result=$(${cmd[*]} "$p_file")
 		log_it "INFO $result"
 		;;
 	*)
