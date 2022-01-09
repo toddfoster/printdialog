@@ -1,5 +1,5 @@
 #!/bin/bash
-#  Time-stamp: <2022-01-09 16:48:36 todd>
+#  Time-stamp: <2022-01-09 16:54:57 todd>
 _self="${0##*/}"
 
 usage()
@@ -142,7 +142,6 @@ pad_multiple_of_four()
 	rm "$blank_pdf"
 }
 
-
 menu_wip()
 {
     zenity --warning --text="Feature not yet implemented."
@@ -259,6 +258,7 @@ cmd=( "lp")
 cmd+=( "-d $p_printer" )
 [[ $p_copies ]] && cmd+=( "-n $p_copies" )
 [[ $p_pages  ]] && cmd+=( "-P $p_pages"  )
+[[ $p_manual ]] && cmd+=( "$p_manual"    )
 echo "${cmd[*]}"
 
 zenity --question $z_looks --text="Printing:\n\n${cmd[*]} $p_file\n\nCorrect?"
