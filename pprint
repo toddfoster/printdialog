@@ -1,5 +1,5 @@
 #!/bin/bash
-#  Time-stamp: <2022-01-09 07:49:49 todd>
+#  Time-stamp: <2022-01-09 15:40:52 todd>
 _self="${0##*/}"
 
 usage()
@@ -54,6 +54,8 @@ p_manual=""
 cmd=""
 
 help=""
+blank_pdf_full="/tmp/blank_pdf_full.pdf"
+blank_pdf_half="/tmp/blank_pdf_half.pdf"
 
 while getopts "d:n:P:hv" opt
 do
@@ -76,6 +78,41 @@ log_it "START $*"
 shift $((OPTIND-1)) # leave filenames in $@
                     # after extracting options
 p_file="$*"
+
+generate_blank_pdf()
+{
+	log_it "DEBUG generate_blank_pdf into $blank_pdf_full and $blank_pdf_half"
+
+	blank_pdf=$(cat <<'__EOF__'
+%PDF-1.4
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj
+3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj
+xref
+0 4
+0000000000 65535 f
+0000000009 00000 n
+0000000052 00000 n
+0000000101 00000 n
+trailer<</Size 4/Root 1 0 R>>
+startxref
+178
+%%EOF
+__EOF__
+			 )
+
+	# fix up some details lost by bash/emacs
+    blank_pdf=${blank_pdf/5 f/5 f }
+	blank_pdf=${blank_pdf/0 n/0 n }
+	blank_pdf=${blank_pdf/%%EOF\n/%%EOF}
+	printf "%s" "$blank_pdf" > "$blank_pdf_full"
+
+	# output half page
+    blank_pdf=${blank_pdf/612/396}
+	blank_pdf=${blank_pdf/792/612}
+	printf "%s" "$blank_pdf" > "$blank_pdf_half"
+}
+
 
 menu_wip()
 {
@@ -128,11 +165,12 @@ menu_other()
 menu_utilities()
 {
     selection=$(zenity --list $z_looks --text "$(menu_main_text_build)\n Utilities:" --column="Select:" \
-                       "Print Mailing" Back )
+                       "Print Mailing" View Back )
     [[ $selection ]] || return
     log_it "DEBUG menu_utilities -> $selection"
     case "$selection" in
         "Print Mailing") menu_wip;;
+		View) okular "$p_file" & ;;
         *) return;;
     esac
 }
