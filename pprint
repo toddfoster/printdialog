@@ -1,5 +1,5 @@
 #!/bin/bash
-#  Time-stamp: <2022-01-09 16:54:57 todd>
+#  Time-stamp: <2022-01-20 14:28:33 todd>
 _self="${0##*/}"
 
 usage()
@@ -30,6 +30,8 @@ log_it()
 		INF) level=$verbose_info   ;;
 		STA) level=$verbose_status ;;
 		FIN) level=$verbose_status ;;
+		ERR) level=$verbose_status ;;
+		WAR) level=$verbose_status ;;
 		*)   level=$verbose_debug  ;;
 	esac
 
