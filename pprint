@@ -1,5 +1,5 @@
 #!/bin/bash
-#  Time-stamp: <2022-01-20 14:28:33 todd>
+#  Time-stamp: <2022-12-20 08:34:24 todd>
 _self="${0##*/}"
 
 usage()
@@ -25,15 +25,15 @@ log_it()
     verbose_info=5
     verbose_status=1
     level=11
-	case "$*" in
-		DEB) level=$verbose_debug  ;;
-		INF) level=$verbose_info   ;;
-		STA) level=$verbose_status ;;
-		FIN) level=$verbose_status ;;
-		ERR) level=$verbose_status ;;
-		WAR) level=$verbose_status ;;
-		*)   level=$verbose_debug  ;;
-	esac
+    case "$*" in
+        DEB) level=$verbose_debug  ;;
+        INF) level=$verbose_info   ;;
+        STA) level=$verbose_status ;;
+        FIN) level=$verbose_status ;;
+        ERR) level=$verbose_status ;;
+        WAR) level=$verbose_status ;;
+        *)   level=$verbose_debug  ;;
+    esac
 
     if (( level <= verbose )); then
         printf "LOG %s | %s | %s\n" "$(date --iso-8601=seconds)" "$_self" "$*" ;
@@ -60,11 +60,11 @@ help=""
 while getopts "d:n:P:hv" opt
 do
     case $opt in
-	v) verbose=100 ;;
-	d) p_printer=$OPTARG ;;
-	n) p_copies=$OPTARG ;;
-	P) p_pages=$OPTARG ;;
-	*) help=true ;;
+        v) verbose=100 ;;
+        d) p_printer=$OPTARG ;;
+        n) p_copies=$OPTARG ;;
+        P) p_pages=$OPTARG ;;
+        *) help=true ;;
     esac
 done
 
@@ -76,17 +76,17 @@ fi
 log_it "START $*"
 
 shift $((OPTIND-1)) # leave filenames in $@
-                    # after extracting options
+# after extracting options
 p_file="$*"
 
 generate_blank_pdf()
 {
-	: << EOF
+    : << EOF
 https://unix.stackexchange.com/a/277967
 
 If you don't use PDF 1.5 object and cross-reference streams (which has the advantage that the file can be completely printable ASCII) I believe the best you can do is 317 bytes. If copying and pasting, take note that there needs to be a trailing space on all four of the cross-reference table entries (the lines between 0 4 and trailer<<...), and that there is not supposed to be a final newline after the %%EOF.
 EOF
-	blank_pdf=$(cat <<'__EOF__'
+    blank_pdf=$(cat <<'__EOF__'
 %PDF-1.4
 1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
 2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj
@@ -102,46 +102,46 @@ startxref
 178
 %%EOF
 __EOF__
-			 )
+    )
 
-	# fix up some details lost by bash/emacs
+    # fix up some details lost by bash/emacs
     blank_pdf=${blank_pdf/5 f/5 f }
-	blank_pdf=${blank_pdf/0 n/0 n }
-	blank_pdf=${blank_pdf/%%EOF\n/%%EOF}
+    blank_pdf=${blank_pdf/0 n/0 n }
+    blank_pdf=${blank_pdf/%%EOF\n/%%EOF}
 
-	# customize page size
+    # customize page size
     blank_pdf=${blank_pdf/XXX/$1}
-	blank_pdf=${blank_pdf/YYY/$2}
+    blank_pdf=${blank_pdf/YYY/$2}
 
-	filename=$(mktemp blankpageXXXXXX.pdf)
-	printf "%s" "$blank_pdf" > "$filename"
-	echo "$filename"
+    filename=$(mktemp blankpageXXXXXX.pdf)
+    printf "%s" "$blank_pdf" > "$filename"
+    echo "$filename"
 }
 
 pad_multiple_of_four()
 {
-	# How many to add?
-	page_count=$(gm identify "$p_file" | wc | awk '{print $1}')
-	additions=$(( 4 - page_count % 4 ))
-	[[ $additions -eq 4 ]] && return
-	log_it "DEBUG pad_multiple_of_four $p_file needs $additions additional pages"
+    # How many to add?
+    page_count=$(gm identify "$p_file" | wc | awk '{print $1}')
+    additions=$(( 4 - page_count % 4 ))
+    [[ $additions -eq 4 ]] && return
+    log_it "DEBUG pad_multiple_of_four $p_file needs $additions additional pages"
 
     # What size?
-	raw_size=$(gm identify "$p_file" | head -1 | awk '{print $3}')
-	log_it "DEBUG pdf raw size = $raw_size"
-	[[ $raw_size =~ ^([0-9]*)x.* ]] && size_x="${BASH_REMATCH[1]}"
-	[[ $raw_size =~ ^.*x([0-9]*)\+.* ]] && size_y="${BASH_REMATCH[1]}"
-	log_it "DEBUG pdf=$size_x x $size_y"
-	blank_pdf=$(generate_blank_pdf "$size_x" "$size_y")
+    raw_size=$(gm identify "$p_file" | head -1 | awk '{print $3}')
+    log_it "DEBUG pdf raw size = $raw_size"
+    [[ $raw_size =~ ^([0-9]*)x.* ]] && size_x="${BASH_REMATCH[1]}"
+    [[ $raw_size =~ ^.*x([0-9]*)\+.* ]] && size_y="${BASH_REMATCH[1]}"
+    log_it "DEBUG pdf=$size_x x $size_y"
+    blank_pdf=$(generate_blank_pdf "$size_x" "$size_y")
 
-	tempfile=$(mktemp tempXXXXX.pdf)
-	while [[ $additions -gt 0 ]]; do
-		pdfunite "$p_file" "$blank_pdf" "$tempfile"
-		mv "$tempfile" "$p_file"
-		(( additions-- ))
-	done
+    tempfile=$(mktemp tempXXXXX.pdf)
+    while [[ $additions -gt 0 ]]; do
+        pdfunite "$p_file" "$blank_pdf" "$tempfile"
+        mv "$tempfile" "$p_file"
+        (( additions-- ))
+    done
 
-	rm "$blank_pdf"
+    rm "$blank_pdf"
 }
 
 menu_wip()
@@ -155,7 +155,7 @@ menu_main_text_build()
     result="$result Dest: $p_printer\n"
     [[ $p_copies ]] && result="$result Copies: $p_copies\n"
     [[ $p_pages  ]] && result="$result Pages: $p_pages\n"
-	[[ $p_manual ]] && result="$result Manual: $p_manual\n"
+    [[ $p_manual ]] && result="$result Manual: $p_manual\n"
     echo $result
 }
 
@@ -175,48 +175,46 @@ menu_other()
 {
     # TODO: come back to this menu when selection is made
     selection=$(zenity --list $z_looks --text "$(menu_main_text_build)\nOther Settings:" --column="Settings" \
-                       Layout Duplex Folding Booklet Color PaperTray Manual Back )
+        Layout Duplex Folding Booklet Color PaperTray Manual Back )
     [[ $selection ]] || return
     log_it "DEBUG menu_other -> $selection"
     case "$selection" in
-        Layout) menu_wip;;
-        Duplex) menu_wip;;
-        Folding) menu_wip;;
-        Booklet) menu_wip;;
-        Color) menu_wip;;
-        PaperTray) menu_wip;;
-		Manual) p_manual=$(zenity --entry $z_looks \
-								   --text="Manual entry of parameters:" \
-								   --entry-text="$p_manual");;
-        *) return;;
+        Layout) menu_wip ;;
+        Duplex) menu_wip ;;
+        Folding) menu_wip ;;
+        Booklet) menu_wip ;;
+        Color) menu_wip ;;
+        PaperTray) menu_wip ;;
+        Manual) p_manual=$(zenity --entry $z_looks --text="Manual entry of parameters:" --entry-text="$p_manual") ;;
+        *) return ;;
     esac
 }
 
 menu_utilities()
 {
     selection=$(zenity --list $z_looks --text "$(menu_main_text_build)\n Utilities:" --column="Select:" \
-                       "Print Mailing" View "Pad for Multiple of 4" Back )
+        "Print Mailing" View "Pad for Multiple of 4" Back )
     [[ $selection ]] || return
     log_it "DEBUG menu_utilities -> $selection"
     case "$selection" in
-        "Print Mailing") menu_wip;;
-		View) okular "$p_file" & ;;
-		Pad*) pad_multiple_of_four ;;
-        *) return;;
+        "Print Mailing") menu_wip ;;
+        View) okular "$p_file" & ;;
+        Pad*) pad_multiple_of_four ;;
+        *) return ;;
     esac
 }
 
 menu_presets()
 {
     selection=$(zenity --list $z_looks --text "$(menu_main_text_build)\nPresets:" --column="Presets" \
-                       Bulletins "Scaled Bulletins" "Large Bulletins" Back)
+        Bulletins "Scaled Bulletins" "Large Bulletins" Back)
     [[ $selection ]] || return
     log_it "DEBUG menu_other -> $selection"
     case "$selection" in
-        Bulletins) menu_wip;;
-        "Scaled Bulletins") menu_wip;;
-        "Large Bulletins") menu_wip;;
-        *) return;;
+        Bulletins) menu_wip ;;
+        "Scaled Bulletins") menu_wip ;;
+        "Large Bulletins") menu_wip ;;
+        *) return ;;
     esac
 }
 
@@ -235,7 +233,7 @@ log_it "DEBUG File selected: $p_file"
 # Get Printer
 printers=$(lpstat -a | awk '{print $1}')
 [[ ! $p_printer ]] && p_printer=$(echo "$printers" | zenity --list $z_looks --column="Printer" \
-                                      --text " File: $p_file\n\nSelect a printer")
+    --text " File: $p_file\n\nSelect a printer")
 [[ $p_printer ]] || exit 0
 log_it "DEBUG Selected $p_printer"
 
@@ -243,15 +241,15 @@ log_it "DEBUG Selected $p_printer"
 selection=""
 while [[ $selection != Print ]]; do
     selection=$(zenity --list $z_looks --text "$(menu_main_text_build)" --column="Menu" \
-                       Print Copies Pages Presets Other Utilities )
+        Print Copies Pages Presets Other Utilities )
     [[ $selection ]] || exit 0
     log_it "DEBUG $selection"
-	case "$selection" in
-        Copies)  menu_copies;;
-        Pages)   menu_pages;;
-        Presets) menu_presets;;
-        Other)   menu_other;;
-		Utilities) menu_utilities;;
+    case "$selection" in
+        Copies)  menu_copies ;;
+        Pages)   menu_pages ;;
+        Presets) menu_presets ;;
+        Other)   menu_other ;;
+        Utilities) menu_utilities ;;
     esac
 done
 
@@ -265,13 +263,13 @@ echo "${cmd[*]}"
 
 zenity --question $z_looks --text="Printing:\n\n${cmd[*]} $p_file\n\nCorrect?"
 case $? in
-	0)
-		log_it "INFO ${cmd[*]} $p_file"
-	    result=$(${cmd[*]} "$p_file")
-		log_it "INFO $result"
-		;;
-	*)
-		log_it "INFO Aborted print"
+    0)
+        log_it "INFO ${cmd[*]} $p_file"
+        result=$(${cmd[*]} "$p_file")
+        log_it "INFO $result"
+        ;;
+    *)
+        log_it "INFO Aborted print"
 
 esac
 log_it "FINISHED $result"
